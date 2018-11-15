@@ -58,9 +58,13 @@ func searchForTools(candidate string) (string, error) {
 		log.Fatal(err)
 	}
 
+	home := os.Getenv("HOME")
+
 	candidates := []string{
+		filepath.Join(home, ".fk/tools"),
 		filepath.Join(dir, "tools"),
 		filepath.Join(filepath.Dir(dir), "lib/flasher"),
+		filepath.Join(filepath.Dir(dir), "lib/fkflash"),
 		"./tools",
 	}
 

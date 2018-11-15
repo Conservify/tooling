@@ -80,6 +80,11 @@ func NewPortDiscoveror() *PortDiscoverer {
 
 func (pd *PortDiscoverer) List() []*Port {
 	ports := make([]*Port, 0)
+
+	for name, _ := range getPortsMap() {
+		ports = append(ports, &Port{Name: name})
+	}
+
 	return ports
 }
 
