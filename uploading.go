@@ -13,17 +13,15 @@ import (
 )
 
 type UploadOptions struct {
-	ToolsDirectory string
-	Boards         *PropertiesMap
-	Platform       *PropertiesMap
-	Board          string
-	Binary         string
-	Port           string
-	SkipTouch      bool
-	FlashOffset    int
-	Verbose        bool
-	Verify         bool
-	Quietly        bool
+	Arduino     *ArduinoEnvironment
+	Board       string
+	Binary      string
+	Port        string
+	SkipTouch   bool
+	FlashOffset int
+	Verbose     bool
+	Verify      bool
+	Quietly     bool
 }
 
 func getPortsMap() map[string]bool {
@@ -124,8 +122,8 @@ func getPlatformKey() string {
 }
 
 func Upload(options *UploadOptions) error {
-	board := options.Boards.ToSubtree(options.Board)
-	tools := options.Platform.ToSubtree("tools")
+	board := options.Arduino.Boards.ToSubtree(options.Board)
+	tools := options.Arduino.Platform.ToSubtree("tools")
 	tool, _ := board.Lookup("upload.tool", make(map[string]string))
 
 	// Force version 18 of bossac.
@@ -193,13 +191,13 @@ func Upload(options *UploadOptions) error {
 		u.Properties["upload.verify"] = ""
 	}
 	u.Properties["upload.offset"] = fmt.Sprintf("%d", options.FlashOffset)
-	u.Properties["runtime.tools.bossac-1.6.1-arduino.path"] = options.ToolsDirectory
-	u.Properties["runtime.tools.bossac-1.8.0-48-gb176eee.path"] = options.ToolsDirectory
+	u.Properties["runtime.tools.bossac-1.6.1-arduino.path"] = options.Arduino.ToolsDirectory
+	u.Properties["runtime.tools.bossac-1.8.0-48-gb176eee.path"] = options.Arduino.ToolsDirectory
 	u.Properties["serial.port.file"] = path.Base(port)
 	u.Properties["build.path"] = path.Dir(options.Binary)
 	u.Properties["build.project_name"] = strings.Replace(path.Base(options.Binary), path.Ext(options.Binary), "", -1)
 
-	line, _ := options.Platform.Lookup(fmt.Sprintf("tools.%s.upload.pattern", tool), u.Properties)
+	line, _ := options.Arduino.Platform.Lookup(fmt.Sprintf("tools.%s.upload.pattern", tool), u.Properties)
 
 	log.Printf(line)
 
