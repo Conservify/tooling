@@ -31,7 +31,9 @@ func getPortsMap() map[string]bool {
 	}
 	m := make(map[string]bool)
 	for _, p := range ports {
-		m[p] = true
+		if runtime.GOOS != "linux" || strings.Contains(p, "ttyACM") {
+			m[p] = true
+		}
 	}
 	return m
 }
