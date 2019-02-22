@@ -49,7 +49,11 @@ func ExecuteAndPipeCommandLine(line string, prefix string, quiet bool) error {
 		return err
 	}
 
+	const maxCapacity = 1024*1024
+
 	soScanner := bufio.NewScanner(soReader)
+	soBuffer := make([]byte, maxCapacity)
+	soScanner .Buffer(soBuffer, maxCapacity)
 	go func() {
 		for soScanner.Scan() {
 			if !quiet {
@@ -59,6 +63,8 @@ func ExecuteAndPipeCommandLine(line string, prefix string, quiet bool) error {
 	}()
 
 	seScanner := bufio.NewScanner(seReader)
+	seBuffer := make([]byte, maxCapacity)
+	seScanner .Buffer(seBuffer, maxCapacity)
 	go func() {
 		for seScanner.Scan() {
 			if !quiet {
