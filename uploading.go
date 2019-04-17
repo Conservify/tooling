@@ -128,6 +128,22 @@ func getPlatformKey() string {
 	return runtime.GOOS
 }
 
+func Touch(port string) error {
+	mode := &serial.Mode{
+		BaudRate: 1200,
+	}
+	p, err := serial.Open(port, mode)
+	if err != nil {
+		listPorts()
+		return fmt.Errorf("Error: Touch failed on (%s): %v", port, err)
+	}
+	p.SetDTR(false)
+	p.SetRTS(true)
+	p.Close()
+
+	return nil
+}
+
 func Upload(options *UploadOptions) error {
 	board := options.Arduino.Boards.ToSubtree(options.Board)
 	tools := options.Arduino.Platform.ToSubtree("tools")
@@ -163,17 +179,7 @@ func Upload(options *UploadOptions) error {
 		if !options.SkipTouch && use1200bpsTouch {
 			log.Printf("Performing 1200bps touch...")
 
-			mode := &serial.Mode{
-				BaudRate: 1200,
-			}
-			p, err := serial.Open(port, mode)
-			if err != nil {
-				listPorts()
-				log.Fatalf("Error: Touch failed on (%s): %v", port, err)
-			}
-			p.SetDTR(false)
-			p.SetRTS(true)
-			p.Close()
+			Touch(port)
 
 			port = NewPortDiscoveror().Discover()
 			if port == "" {
