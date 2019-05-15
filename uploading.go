@@ -92,21 +92,30 @@ func (pd *PortDiscoverer) List() []*Port {
 
 func (pd *PortDiscoverer) Discover() string {
 	s := time.Now()
+	logged := time.Time{}
 
 	for {
 		after := getPortsMap()
 
 		added, removed := diffPortMaps(pd.before, after)
 
-		log.Printf("%v -> %v | %v %v\n", toKeys(pd.before), toKeys(after), removed, added)
+		now := time.Now()
 
-		if len(added) > 0 {
+		haveNewPort := len(added) > 0
+		shouldLog := haveNewPort || now.Sub(logged) > 500*time.Millisecond
+
+		if shouldLog {
+			log.Printf("%v -> %v | %v %v\n", toKeys(pd.before), toKeys(after), removed, added)
+			logged = now
+		}
+
+		if haveNewPort {
 			return added[0]
 		}
 
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 
-		if time.Since(s) > 5*time.Second {
+		if time.Since(s) > 3*time.Second {
 			break
 		}
 
